@@ -1,0 +1,5 @@
+#!  /bin/sh
+make distclean
+qmake
+make -j4
+cp hmisvr $ARM_ACCHARGE_APP_RUNTIME_DIR

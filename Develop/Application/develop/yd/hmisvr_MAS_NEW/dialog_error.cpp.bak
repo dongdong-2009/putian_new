@@ -1,0 +1,151 @@
+#include "dialog_error.h"
+#include "ui_dialog_error.h"
+#include "globalhmi.h"
+
+Dialog_error::Dialog_error(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Dialog_error)
+{
+    ui->setupUi(this);
+}
+
+Dialog_error::~Dialog_error()
+{
+    delete ui;
+}
+
+void Dialog_error::init_page_dlg()
+{
+    timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(timer_handle()));
+    timer->start(PAGE_FLUSH_TIMER);
+    init_page_val();
+}
+
+void Dialog_error::init_page_val()
+{
+ //    ui->label_code->setText(code);
+      ui->label_code->setText(phonenum);
+    UINT8 data = NO_BUTTON;
+    API_Write_DB_Nbyte(PL_HMI_BUTTON_DOWN,(INT8 *)(&data),sizeof(data));
+
+    int state_flag = 0;
+     API_Write_DB_Nbyte(PL_STUBERRSTATE_FLAG,(int *)(&state_flag),sizeof(state_flag));
+}
+
+void Dialog_error::start_timer()
+{
+    timer->start(PAGE_FLUSH_TIMER);
+    init_page_val();
+}
+
+void Dialog_error::timer_handle()
+{
+    update_page_info();
+}
+int read_state_flag = 0;
+void Dialog_error::update_page_info()
+{
+    ui->lbl_sysdate->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd"));
+    ui->lbl_systime->setText(QTime::currentTime().toString("hh:mm:ss"));
+    if(language_num == 1)
+    {
+          //ui->label_logo->setText(QString::fromUtf8("交 流 充 电 桩"));
+         // ui->label_title->setText(QString::fromUtf8("故 障 信 息"));
+          ui->label_stubnum->setText(QString::fromUtf8("客  服  热  线  :"));
+          //ui->label_state->setText(QString::fromUtf8("设备故障编码 :"));
+    }
+    else  if(language_num == 2)
+    {
+         // ui->label_logo->setText("AC charging pile");
+         // ui->label_title->setText("Err Information");
+          ui->label_stubnum->setText("Telephone :");
+         // ui->label_state->setText("Error State Num :");
+    }
+    else
+    {
+
+    }
+
+    API_Read_DB_Nbyte(PL_STUBERRSTATE_FLAG,(int *)(&error_state_flag),sizeof(error_state_flag));
+    printf("error_state_flag= %x\n",error_state_flag);
+    if((0x200000 & error_state_flag)==0x200000)
+    {
+        if(language_num == 1)
+        {
+            ui->label_state->setText(QString::fromUtf8("急停按钮已按下,请恢复"));
+        }
+        else if(language_num == 2)
+        {
+            ui->label_state->setText("Emergency button has been pressed,please recover");
+        }
+        else
+        {
+
+        }
+        //error_state_flag=error_state_flag-0x200000;
+    }
+    else if(error_state_flag==0x0)
+    {
+
+       read_state_flag++;
+       if(read_state_flag>=50)
+       {
+       //printf("gexit_page_dlg111111111111111111111111\n");
+       read_state_flag=0;
+       exit_page_dlg();
+       }
+        //exit_page_dlg();
+    }
+    else if((0x800000 & error_state_flag)==0x800000)
+    {
+       //printf("gexit_page_dlg222222222222222222222222\n");
+        exit_page_dlg();
+
+    }
+    else 
+    {
+            //ui->label_state_num->setText(QString::number(error_state_flag,16));
+          if(language_num == 1)
+          {
+              ui->label_state->setText(QString::fromUtf8("设备故障,暂停使用"));
+          }
+          else if(language_num == 2)
+          {
+              ui->label_state->setText("Equipment trouble,lay up");
+          }
+          else
+          {
+
+          }
+    }
+ }
+
+void Dialog_error::exit_page_dlg()
+{
+    init_page_val();
+    timer->stop();
+
+    if(p20_dlg)
+    {
+        emit signal_exit_errdlg_payoff();
+    }
+    else if(p21_dlg)
+    {
+        emit signal_exit_errdlg_judge();
+    }
+    else if(p19_dlg)
+    {
+        emit signal_exit_errdlg_charging();
+    }
+    else if(p05_dlg)
+    {
+        emit signal_exit_errdlg_link();
+    }
+    else
+    {
+        emit  signal_exit_errdlg();
+    }
+    delete err_dlg;
+    err_dlg = NULL;
+}

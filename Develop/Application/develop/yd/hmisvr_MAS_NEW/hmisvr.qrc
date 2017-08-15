@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>qrc/icon/0.png</file>
+        <file>qrc/icon/1.png</file>
+        <file>qrc/keyboard-b/T_press.png</file>
+        <file>qrc/keyboard-b/T.png</file>
+        <file>qrc/keyboard-b/button-02.png</file>
+        <file>qrc/keyboard-b/btn_bg.png</file>
+        <file>qrc/icon/Podcast.png</file>
+        <file>qrc/keyboard-b/button_03.png</file>
+    </qresource>
+    <qresource prefix="/background">
+        <file>qrc/PICS/bk-potevio_1.png</file>
+    </qresource>
+</RCC>

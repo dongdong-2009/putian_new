@@ -1,0 +1,16 @@
+/dev/ttyUSB0
+115200
+#lock
+crtscts
+persist
+modem
+noauth
+defaultroute
+user ctnet@mycdma.cn
+password vnet.mobi
+connect "chat -esvf /etc/ppp/peers/wcdma.chat"
+noipdefault
+usepeerdns
+nobsdcomp
+novj
+debug

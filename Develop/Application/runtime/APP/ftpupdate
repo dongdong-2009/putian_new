@@ -1,0 +1,57 @@
+#!/bin/sh
+#pkill hmisvr
+#pkill chargemainctl
+
+
+echo "============================================================"
+echo "                  Update Application Begin                 "
+echo "------------------------------------------------------------"
+. /usr/APP/ftpconf
+echo FTP server = $ftpserver
+
+cd appupdate
+#rm APP.tar.gz       
+#rm md5              
+#rm ftpmd5
+for i in $(seq 1 2); 
+do
+lftp $ftpserver <<!
+#lftp haisen:123456@192.168.2.68:21 <<!
+#binary
+get APP.tar.gz
+get md5
+get version
+bye
+!
+
+
+md5sum APP.tar.gz >ftpmd5
+if cmp -s ftpmd5 md5
+then
+
+
+
+break
+else
+rm APP.tar.gz            
+rm md5                   
+rm ftpmd5
+touch /usr/APP/ftp.txt  
+fi
+done  
+
+
+tar -zxvf APP.tar.gz
+
+./update
+rm APP.tar.gz
+rm md5
+rm ftpmd5
+rm version
+echo "============================================================"
+echo "                  Update Application DONE                   "
+echo "------------------------------------------------------------"
+
+
+
+#done
